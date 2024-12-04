@@ -88,8 +88,8 @@ resource "azurerm_linux_virtual_machine" "neu-onprem" {
     version   = "latest"
   }
 
-    boot_diagnostics {    
-    }
+  boot_diagnostics {
+  }
 }
 
 resource "azurerm_local_network_gateway" "neu-lng" {
@@ -113,5 +113,17 @@ resource "azurerm_virtual_network_gateway_connection" "neu-vngc" {
   enable_bgp                 = true
   virtual_network_gateway_id = azurerm_virtual_network_gateway.neu-vng.id
   local_network_gateway_id   = azurerm_local_network_gateway.neu-lng.id
+  shared_key                 = random_string.vpn-psk.result
+}
+
+resource "azurerm_virtual_network_gateway_connection" "neu-mpls-vngc" {
+  name                = "vngc-mpls-${var.neu-name}"
+  location            = azurerm_resource_group.neu-onprem.location
+  resource_group_name = azurerm_resource_group.neu-onprem.name
+
+  type                       = "IPsec"
+  enable_bgp                 = false
+  virtual_network_gateway_id = azurerm_virtual_network_gateway.neu-vng.id
+  local_network_gateway_id   = azurerm_local_network_gateway.mpls-lng.id
   shared_key                 = random_string.vpn-psk.result
 }
